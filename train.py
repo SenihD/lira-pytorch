@@ -16,7 +16,7 @@ from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from torchvision import models, transforms
-from torchvision.datasets import CIFAR10
+from torchvision.datasets import CIFAR10, ImageFolder
 from tqdm import tqdm
 
 from wide_resnet import WideResNet
@@ -28,9 +28,13 @@ parser.add_argument("--n_shadows", default=16, type=int)
 parser.add_argument("--shadow_id", default=1, type=int)
 parser.add_argument("--model", default="resnet18", type=str)
 parser.add_argument("--pkeep", default=0.5, type=float)
-parser.add_argument("--savedir", default="exp/cifar10", type=str)
+parser.add_argument('--dataset', default='cifar10', type=str, choices=['cifar10', 'malimg'])
+parser.add_argument("--savedir", default=None, type=str)
 parser.add_argument("--debug", action="store_true")
+
 args = parser.parse_args()
+if args.savedir is None:
+    args.savedir = f"exp/{args.dataset}"
 
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("mps")
 
@@ -45,31 +49,41 @@ def run():
     wandb.config.update(args)
 
     # Dataset
-    train_transform = transforms.Compose(
-        [
+    if args.dataset == 'cifar10':
+        num_classes = 10
+        train_transform = transforms.Compose([
             transforms.RandomHorizontalFlip(),
             transforms.RandomCrop(32, padding=4),
             transforms.ToTensor(),
             transforms.Normalize([0.4914, 0.4822, 0.4465], [0.2470, 0.2435, 0.2616]),
-        ]
-    )
-    test_transform = transforms.Compose(
-        [
+        ])
+        test_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize([0.4914, 0.4822, 0.4465], [0.2470, 0.2435, 0.2616]),
-        ]
-    )
-    datadir = Path().home() / "opt/data/cifar"
-    train_ds = CIFAR10(root=datadir, train=True, download=True, transform=train_transform)
-    test_ds = CIFAR10(root=datadir, train=False, download=True, transform=test_transform)
+        ])
+        datadir = Path().home() / "opt/data/cifar"
+        train_ds = CIFAR10(root=datadir, train=True, download=True, transform=train_transform)
+        test_ds = CIFAR10(root=datadir, train=False, download=True, transform=test_transform)
 
-    # Compute the IN / OUT subset:
-    # If we run each experiment independently then even after a lot of trials
-    # there will still probably be some examples that were always included
-    # or always excluded. So instead, with experiment IDs, we guarantee that
-    # after `args.n_shadows` are done, each example is seen exactly half
-    # of the time in train, and half of the time not in train.
+    elif args.dataset == 'malimg':
+        num_classes = 25
+        train_transform = transforms.Compose([
+            transforms.Resize((32, 32)), 
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+        test_transform = transforms.Compose([
+            transforms.Resize((32, 32)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+        traindir = Path().home() / "opt/data/malimg/train" 
+        testdir = Path().home() / "opt/data/malimg/test"
+        
+        train_ds = ImageFolder(root=traindir, transform=train_transform)
+        test_ds = ImageFolder(root=testdir, transform=test_transform)
 
+    # In - Out grouping
     size = len(train_ds)
     np.random.seed(seed)
     if args.n_shadows is not None:
@@ -91,11 +105,11 @@ def run():
 
     # Model
     if args.model == "wresnet28-2":
-        m = WideResNet(28, 2, 0.0, 10)
+        m = WideResNet(28, 2, 0.0, num_classes)
     elif args.model == "wresnet28-10":
-        m = WideResNet(28, 10, 0.3, 10)
+        m = WideResNet(28, 10, 0.3, num_classes)
     elif args.model == "resnet18":
-        m = models.resnet18(weights=None, num_classes=10)
+        m = models.resnet18(weights=None, num_classes=num_classes)
         m.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
         m.maxpool = nn.Identity()
     else:
