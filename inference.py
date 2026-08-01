@@ -26,7 +26,6 @@ parser.add_argument("--savedir", default=None, type=str)
 args = parser.parse_args()
 if args.savedir is None:
     args.savedir = f"exp/{args.dataset}"
-    #args.savedir += "/0"
 
 
 @torch.no_grad()
