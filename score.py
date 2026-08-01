@@ -22,11 +22,15 @@ import os
 from pathlib import Path
 
 import numpy as np
-from torchvision.datasets import CIFAR10
+from torchvision.datasets import CIFAR10, ImageFolder
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--savedir", default="exp/cifar10", type=str)
+parser.add_argument("--dataset", default="cifar10", type=str, choices=["cifar10", "malimg"])
+parser.add_argument("--savedir", default=None, type=str)
 args = parser.parse_args()
+
+if args.savedir is None:
+    args.savedir = f"exp/{args.dataset}"
 
 
 def load_one(path):
@@ -56,15 +60,30 @@ def load_one(path):
 
 
 def get_labels():
-    datadir = Path().home() / "opt/data/cifar"
-    train_ds = CIFAR10(root=datadir, train=True, download=True)
-    return np.array(train_ds.targets)
+    if args.dataset == "cifar10":
+        datadir = Path().home() / "opt/data/cifar"
+        train_ds = CIFAR10(root=datadir, train=True, download=True)
+        return np.array(train_ds.targets)
+    
+    elif args.dataset == "malimg":
+        traindir = Path().home() / "opt/data/malimg/train"
+        train_ds = ImageFolder(root=traindir)
+        return np.array(train_ds.targets)
+     
+    else:
+        raise ValueError(f"Unsupported dataset: {args.dataset}")
 
 
 def load_stats():
+    # Ignore hidden files like .DS_Store
+    model_dirs = [
+        os.path.join(args.savedir, x) 
+        for x in os.listdir(args.savedir) 
+        if os.path.isdir(os.path.join(args.savedir, x))
+    ]
+    
     with mp.Pool(8) as p:
-        p.map(load_one, [os.path.join(args.savedir, x) for x in os.listdir(args.savedir)])
-
+        p.map(load_one, model_dirs)
 
 if __name__ == "__main__":
     load_stats()
