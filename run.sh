@@ -1,21 +1,36 @@
-python3 train.py --epochs 100 --shadow_id 0 --debug
-python3 train.py --epochs 100 --shadow_id 1 --debug
-python3 train.py --epochs 100 --shadow_id 2 --debug
-python3 train.py --epochs 100 --shadow_id 3 --debug
-python3 train.py --epochs 100 --shadow_id 4 --debug
-python3 train.py --epochs 100 --shadow_id 5 --debug
-python3 train.py --epochs 100 --shadow_id 6 --debug
-python3 train.py --epochs 100 --shadow_id 7 --debug
-python3 train.py --epochs 100 --shadow_id 8 --debug
-python3 train.py --epochs 100 --shadow_id 9 --debug
-python3 train.py --epochs 100 --shadow_id 10 --debug
-python3 train.py --epochs 100 --shadow_id 11 --debug
-python3 train.py --epochs 100 --shadow_id 12 --debug
-python3 train.py --epochs 100 --shadow_id 13 --debug
-python3 train.py --epochs 100 --shadow_id 14 --debug
-python3 train.py --epochs 100 --shadow_id 15 --debug
+#!/bin/bash
 
-python3 inference.py --savedir exp/cifar10
-python3 score.py --savedir exp/cifar10
-python3 plot.py --savedir exp/cifar10
+# ---------------------------------------------------------
+# CONFIGURATION
+# ---------------------------------------------------------
+# Set this to "malimg" or "cifar10" to toggle the pipeline
 
+DATASET="malimg"
+EPOCHS=3
+N_SHADOWS=1
+
+echo "========================================"
+echo "Starting LiRA Pipeline for: $DATASET"
+echo "========================================"
+
+# 1. Train all 16 shadow models
+echo "[1/4] Training Shadow Models..."
+for ((id=0; id<N_SHADOWS; id++))
+do
+    echo " -> Training Shadow Model $id"
+    python3 train.py --dataset $DATASET --epochs $EPOCHS --shadow_id $id
+done
+
+'''
+# 2. Run Inference
+echo "[2/4] Running Inference..."
+python3 inference.py --dataset $DATASET
+
+# 3. Calculate Scores
+echo "[3/4] Calculating Scores..."
+python3 score.py --dataset $DATASET
+
+# 4. Generate FPR/TPR Plots
+echo "[4/4] Generating Plots..."
+python3 plot.py --dataset $DATASET
+'''
