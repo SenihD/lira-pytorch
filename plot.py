@@ -30,14 +30,19 @@ matplotlib.rcParams["pdf.fonttype"] = 42
 matplotlib.rcParams["ps.fonttype"] = 42
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--savedir", default="exp/cifar10", type=str)
+parser.add_argument('--dataset', default='cifar10', type=str, choices=['cifar10', 'malimg'])
+parser.add_argument("--savedir", default=None, type=str)
+
 args = parser.parse_args()
+if args.savedir is None:
+    args.savedir = f"exp/{args.dataset}"
 
 
 def sweep(score, x):
     """
     Compute a ROC curve and then return the FPR, TPR, AUC, and ACC.
     """
+    ###
     fpr, tpr, _ = roc_curve(x, -score)
     acc = np.max(1 - (fpr + (1 - tpr)) / 2)
     return fpr, tpr, auc(fpr, tpr), acc
@@ -52,6 +57,9 @@ def load_data():
     keep = []
 
     for path in os.listdir(args.savedir):
+        # For macOS file system
+        if path == ".DS_Store":
+            continue
         scores.append(np.load(os.path.join(args.savedir, path, "scores.npy")))
         keep.append(np.load(os.path.join(args.savedir, path, "keep.npy")))
     scores = np.array(scores)
@@ -158,6 +166,7 @@ def do_plot(fn, keep, scores, ntest, legend="", metric="auc", sweep_fn=sweep, **
 
     prediction, answers = fn(keep[:-ntest], scores[:-ntest], keep[-ntest:], scores[-ntest:])
 
+    ###
     fpr, tpr, auc, acc = sweep_fn(np.array(prediction), np.array(answers, dtype=bool))
 
     low = tpr[np.where(fpr < 0.001)[0][-1]]
