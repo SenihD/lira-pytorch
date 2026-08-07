@@ -1,5 +1,4 @@
 # Likelihood Ration Attack (LiRA) in PyTorch
-Implementation of the original [LiRA](https://github.com/tensorflow/privacy/tree/master/research/mi_lira_2021) using PyTorch. To run the code, first create an environment with the `env.yml` file. Then run the following command to train the models and run the LiRA attack:
 
 This repository contains the implementation of the original [LiRA](https://github.com/tensorflow/privacy/tree/master/research/mi_lira_2021) using PyTorch. CIFAR-10 and MalIMG datasets are implemented for the attack. To run the code, first create an environment with the `env.yml` file. Then run the following command to train the models and run the LiRA attack:
 
@@ -13,7 +12,7 @@ The output will generate and store a log-scale FPR-TPR curve as `./fprtpr.png` w
 
 ## Results on MalIMG
 
-Using 16 shadow models trained with `ResNet18 for 100 epochs with 18 augmented queries:
+Using 16 shadow models trained with `ResNet18 for 100 epochs with 18 augmented queries`:
 
 ![roc](figures/fprtpr_resnet18_malimg.png)
 
