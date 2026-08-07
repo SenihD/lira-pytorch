@@ -15,8 +15,9 @@ The output will generate and store a log-scale FPR-TPR curve as `./fprtpr.png` w
 
 Using 16 shadow models trained with `ResNet18 for 100 epochs with 18 augmented queries:
 
-![roc-malimg](figures/fprtpr-16 shadows- 100 epoch- 18 queries.png)
+![roc](figures/fprtpr_resnet18_malimg.png)
 
+```
 Attack Ours (online)
    AUC 0.5549, Accuracy 0.5371, TPR@0.1%FPR of 0.0030
 Attack Ours (online, fixed variance)
@@ -27,6 +28,7 @@ Attack Ours (offline, fixed variance)
    AUC 0.5205, Accuracy 0.5210, TPR@0.1%FPR of 0.0074
 Attack Global threshold
    AUC 0.5282, Accuracy 0.5285, TPR@0.1%FPR of 0.0011
+```
 
 ## Results on CIFAR10
 
