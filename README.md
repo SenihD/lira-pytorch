@@ -1,11 +1,32 @@
 # Likelihood Ration Attack (LiRA) in PyTorch
 Implementation of the original [LiRA](https://github.com/tensorflow/privacy/tree/master/research/mi_lira_2021) using PyTorch. To run the code, first create an environment with the `env.yml` file. Then run the following command to train the models and run the LiRA attack:
 
-```
+This repository contains the implementation of the original [LiRA](https://github.com/tensorflow/privacy/tree/master/research/mi_lira_2021) using PyTorch. CIFAR-10 and MalIMG datasets are implemented for the attack. To run the code, first create an environment with the `env.yml` file. Then run the following command to train the models and run the LiRA attack:
+
+```bash
+conda env create -f env.yml
+conda activate lira_env
 ./run.sh
-```
+
 
 The output will generate and store a log-scale FPR-TPR curve as `./fprtpr.png` with the TPR@0.1%FPR in the output log.
+
+## Results on MalIMG
+
+Using 16 shadow models trained with `ResNet18 for 100 epochs with 18 augmented queries:
+
+![roc-malimg](figures/fprtpr-16 shadows- 100 epoch- 18 queries.png)
+
+Attack Ours (online)
+   AUC 0.5549, Accuracy 0.5371, TPR@0.1%FPR of 0.0030
+Attack Ours (online, fixed variance)
+   AUC 0.5567, Accuracy 0.5381, TPR@0.1%FPR of 0.0129
+Attack Ours (offline)
+   AUC 0.5233, Accuracy 0.5204, TPR@0.1%FPR of 0.0033
+Attack Ours (offline, fixed variance)
+   AUC 0.5205, Accuracy 0.5210, TPR@0.1%FPR of 0.0074
+Attack Global threshold
+   AUC 0.5282, Accuracy 0.5285, TPR@0.1%FPR of 0.0011
 
 ## Results on CIFAR10
 
