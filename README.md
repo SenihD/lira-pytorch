@@ -7,7 +7,7 @@ This repository contains the implementation of the original [LiRA](https://githu
 conda env create -f env.yml
 conda activate lira_env
 ./run.sh
-
+```
 
 The output will generate and store a log-scale FPR-TPR curve as `./fprtpr.png` with the TPR@0.1%FPR in the output log.
 
