@@ -205,7 +205,8 @@ def fig_fpr_tpr():
     plt.plot([0, 1], [0, 1], ls="--", color="gray")
     plt.subplots_adjust(bottom=0.18, left=0.18, top=0.96, right=0.96)
     plt.legend(fontsize=8)
-    plt.savefig("fprtpr.png")
+    filename = "fprtpr.png_" + args.dataset
+    plt.savefig(filename)
     plt.show()
 
 
