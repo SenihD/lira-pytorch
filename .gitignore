@@ -4,4 +4,4 @@ logs
 slurm
 gpu.sh
 *.out
-
+data/
