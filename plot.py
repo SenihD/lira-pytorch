@@ -30,7 +30,7 @@ matplotlib.rcParams["pdf.fonttype"] = 42
 matplotlib.rcParams["ps.fonttype"] = 42
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', default='cifar10', type=str, choices=['cifar10', 'malimg'])
+parser.add_argument('--dataset', default='cifar10', type=str, choices=['cifar10', 'malimg', 'malnet'])
 parser.add_argument("--savedir", default=None, type=str)
 
 args = parser.parse_args()

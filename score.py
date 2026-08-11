@@ -24,8 +24,11 @@ from pathlib import Path
 import numpy as np
 from torchvision.datasets import CIFAR10, ImageFolder
 
+from dataset_utils import resolve_dataset_root
+
 parser = argparse.ArgumentParser()
-parser.add_argument("--dataset", default="cifar10", type=str, choices=["cifar10", "malimg"])
+parser.add_argument("--dataset", default="cifar10", type=str, choices=["cifar10", "malimg", "malnet"])
+parser.add_argument("--dataset_path", default=None, type=str)
 parser.add_argument("--savedir", default=None, type=str)
 args = parser.parse_args()
 
@@ -60,16 +63,26 @@ def load_one(path):
 
 
 def get_labels():
-    if args.dataset == "cifar10":
-        datadir = Path().home() / "opt/data/cifar"
-        train_ds = CIFAR10(root=datadir, train=True, download=True)
+    dataset_root = resolve_dataset_root(args.dataset, args.dataset_path)
+    dataset_name = args.dataset.lower()
+
+    if dataset_name == "cifar10":
+        train_ds = CIFAR10(root=dataset_root, train=True, download=True)
         return np.array(train_ds.targets)
-    
-    elif args.dataset == "malimg":
-        traindir = Path().home() / "opt/data/malimg/train"
+
+    elif dataset_name == "malimg":
+        traindir = dataset_root / "train"
         train_ds = ImageFolder(root=traindir)
         return np.array(train_ds.targets)
-     
+
+    elif dataset_name == "malnet":
+        train_dir = dataset_root / "train"
+        if train_dir.is_dir():
+            train_ds = ImageFolder(root=train_dir)
+        else:
+            train_ds = ImageFolder(root=dataset_root)
+        return np.array(train_ds.targets)
+
     else:
         raise ValueError(f"Unsupported dataset: {args.dataset}")
 
