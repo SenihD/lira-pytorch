@@ -66,3 +66,41 @@ Attack Ours (offline, fixed variance)
 Attack Global threshold
    AUC 0.6016, Accuracy 0.5977, TPR@0.1%FPR of 0.0013
 ```
+
+## Folder structure
+
+Below is the repository's current top-level folder structure and a short description of each entry. This should help navigate the project and locate scripts, experiments, and results.
+
+```
+lira-pytorch/
+├── exp/                    # experiment outputs and checkpoints
+│   ├── cifar10/            # CIFAR-10 experiment runs (subfolders per run)
+│   │   ├── 0/
+│   │   └── 1/
+│   └── malimg/             # MalImg experiment runs (subfolders per run)
+│       ├── 0/
+│       ├── 1/
+│       ├── 2/
+│       └── 3/
+├── figures/                # pre-generated figures (ROC / curves)
+│   ├── fprtpr_resnet18.png
+│   ├── fprtpr_resnet18_malimg.png
+│   └── fprtpr_wideresnet.png
+├── dataset_utils.py        # dataset loading / preprocessing helpers
+├── train.py                # training script for models and shadows
+├── inference.py            # run inference / LiRA attack pipeline
+├── score.py                # scoring / evaluation utilities
+├── plot.py                 # plotting utilities
+├── wide_resnet.py          # WideResNet model definition
+├── run.sh                  # convenience script to run full pipeline
+├── env.yml                 # conda environment specification
+├── README.md               # this file
+├── LICENSE
+├── .gitignore
+└── (other scripts and images)
+```
+
+Notes:
+- Datasets are expected to be resolved from a top-level `data/` directory by default (see above sections describing dataset paths). If `data/` is not present in the repository, create it at the top level and place dataset folders as required (e.g., `data/cifar`, `data/malimg`, `data/malnet_resized_32x256`) or use the `--dataset_path` option where supported.
+- The `exp/` directory contains per-run outputs (checkpoints, logs, attack results). Each numeric subfolder corresponds to an experimental run.
+- Add or update entries here if the folder layout changes in the future so the README stays accurate.
