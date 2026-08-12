@@ -1,6 +1,6 @@
 # Likelihood Ration Attack (LiRA) in PyTorch
 
-This repository contains the implementation of the original [LiRA](https://github.com/tensorflow/privacy/tree/master/research/mi_lira_2021) using PyTorch. CIFAR-10 and MalIMG datasets are implemented for the attack. To run the code, first create an environment with the `env.yml` file. Then run the following command to train the models and run the LiRA attack:
+This repository contains the implementation of the original [LiRA](https://github.com/tensorflow/privacy/tree/master/research/mi_lira_2021) using PyTorch. CIFAR-10, MalIMG, and MalNet datasets are implemented for the attack. To run the code, first create an environment with the `env.yml` file. Then run the following command to train the models and run the LiRA attack:
 
 ```bash
 conda env create -f env.yml
@@ -9,6 +9,10 @@ conda activate lira_env
 ```
 
 The output will generate and store a log-scale FPR-TPR curve as `./fprtpr.png` with the TPR@0.1%FPR in the output log.
+
+All datasets now resolve from the repository's shared `data/` directory by default. CIFAR-10 uses `data/cifar`, MalImg uses `data/malimg`, and MalNet uses `data/malnet_resized_32x256` (or a custom path you pass with `--dataset_path`).
+
+To use the MalNet dataset, run the pipeline with `--dataset malnet`. The first run will download the archive from Google Drive into the repository's `data/` directory and extract it to `data/malnet_resized_32x256`.
 
 ## Results on MalIMG
 

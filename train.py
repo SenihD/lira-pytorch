@@ -19,6 +19,7 @@ from torchvision import models, transforms
 from torchvision.datasets import CIFAR10, ImageFolder
 from tqdm import tqdm
 
+from dataset_utils import resolve_dataset_root
 from wide_resnet import WideResNet
 
 parser = argparse.ArgumentParser()
@@ -28,7 +29,8 @@ parser.add_argument("--n_shadows", default=16, type=int)
 parser.add_argument("--shadow_id", default=1, type=int)
 parser.add_argument("--model", default="resnet18", type=str)
 parser.add_argument("--pkeep", default=0.5, type=float)
-parser.add_argument('--dataset', default='cifar10', type=str, choices=['cifar10', 'malimg'])
+parser.add_argument('--dataset', default='cifar10', type=str, choices=['cifar10', 'malimg', 'malnet'])
+parser.add_argument("--dataset_path", default=None, type=str)
 parser.add_argument("--savedir", default=None, type=str)
 parser.add_argument("--debug", action="store_true")
 
@@ -49,8 +51,10 @@ def run():
     wandb.config.update(args)
 
     # Dataset
-    if args.dataset == 'cifar10':
-        num_classes = 10
+    dataset_root = resolve_dataset_root(args.dataset, args.dataset_path)
+    dataset_name = args.dataset.lower()
+
+    if dataset_name == 'cifar10':
         train_transform = transforms.Compose([
             transforms.RandomHorizontalFlip(),
             transforms.RandomCrop(32, padding=4),
@@ -61,27 +65,49 @@ def run():
             transforms.ToTensor(),
             transforms.Normalize([0.4914, 0.4822, 0.4465], [0.2470, 0.2435, 0.2616]),
         ])
-        datadir = Path().home() / "opt/data/cifar"
-        train_ds = CIFAR10(root=datadir, train=True, download=True, transform=train_transform)
-        test_ds = CIFAR10(root=datadir, train=False, download=True, transform=test_transform)
+        train_ds = CIFAR10(root=dataset_root, train=True, download=True, transform=train_transform)
+        test_ds = CIFAR10(root=dataset_root, train=False, download=True, transform=test_transform)
 
-    elif args.dataset == 'malimg':
-        num_classes = 25
+    elif dataset_name == 'malimg':
         train_transform = transforms.Compose([
-            transforms.Resize((32, 32)), 
+            transforms.Resize((224, 224)),
             transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ])
         test_transform = transforms.Compose([
-            transforms.Resize((32, 32)),
+            transforms.Resize((224, 224)),
             transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ])
-        traindir = Path().home() / "opt/data/malimg/train" 
-        testdir = Path().home() / "opt/data/malimg/test"
-        
+        traindir = dataset_root / "train"
+        testdir = dataset_root / "test"
+
         train_ds = ImageFolder(root=traindir, transform=train_transform)
         test_ds = ImageFolder(root=testdir, transform=test_transform)
+
+    elif dataset_name == 'malnet':
+        train_transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        ])
+        test_transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        ])
+        train_dir = dataset_root / "train"
+        test_dir = dataset_root / "test"
+        if train_dir.is_dir() and test_dir.is_dir():
+            train_ds = ImageFolder(root=train_dir, transform=train_transform)
+            test_ds = ImageFolder(root=test_dir, transform=test_transform)
+        else:
+            train_ds = ImageFolder(root=dataset_root, transform=train_transform)
+            test_ds = ImageFolder(root=dataset_root, transform=test_transform)
+    else:
+        raise ValueError(f"Unsupported dataset: {args.dataset}")
+
+    num_classes = len(train_ds.classes)
 
     # In - Out grouping
     size = len(train_ds)
