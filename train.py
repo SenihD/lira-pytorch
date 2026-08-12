@@ -38,7 +38,13 @@ args = parser.parse_args()
 if args.savedir is None:
     args.savedir = f"exp/{args.dataset}"
 
-DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("mps")
+
+if torch.cuda.is_available():
+    DEVICE = "cuda"
+elif torch.backends.mps.is_available():
+    DEVICE = "mps"
+else:
+    DEVICE = "cpu"
 
 
 def run():
