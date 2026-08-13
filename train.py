@@ -38,7 +38,13 @@ args = parser.parse_args()
 if args.savedir is None:
     args.savedir = f"exp/{args.dataset}"
 
-DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("mps")
+
+if torch.cuda.is_available():
+    DEVICE = "cuda"
+elif torch.backends.mps.is_available():
+    DEVICE = "mps"
+else:
+    DEVICE = "cpu"
 
 
 def run():
@@ -87,12 +93,12 @@ def run():
 
     elif dataset_name == 'malnet':
         train_transform = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize((32, 32)),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ])
         test_transform = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize((32, 32)),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ])

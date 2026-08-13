@@ -4,8 +4,8 @@
 # CONFIGURATION
 # ---------------------------------------------------------
 DATASET="malnet"
-EPOCHS=2
-N_SHADOWS=4
+EPOCHS=50
+N_SHADOWS=16
 N_QUERIES=2
 
 echo "========================================"
