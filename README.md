@@ -14,6 +14,39 @@ All datasets now resolve from the repository's shared `data/` directory by defau
 
 To use the MalNet dataset, run the pipeline with `--dataset malnet`. The first run will download the archive from Google Drive into the repository's `data/` directory and extract it to `data/malnet_resized_32x256`.
 
+## Federated learning (FedAvg)
+
+The shadow-model training can also run as a federated learning pipeline instead of
+centralized training. In federated mode a `Server` holds the global model and a set of
+`Client`s each own a private shard of the shadow training set. Per global round:
+
+1. The server broadcasts the current global weights to the selected clients.
+2. Each selected client trains the model locally for `--local_epochs`.
+3. Clients send their updated weights back to the server.
+4. The server aggregates the received weights with **FedAvg** (weighted by each
+   client's number of training samples) and the process repeats for `--global_epochs`.
+
+The data is split either IID (uniform random shards) or non-IID (per-class
+Dirichlet distribution, controlled with `--alpha`; lower values are more non-IID).
+Only a fraction of clients can be made to participate each round via
+`--client_fraction`.
+
+```bash
+# Federated shadow training, e.g. 20 clients, 5 clients/round, 1 local epoch,
+# 30 global rounds, non-IID split
+python train.py --dataset cifar10 --federated \
+    --num_clients 20 --client_fraction 0.25 \
+    --global_epochs 30 --local_epochs 1 \
+    --partition dirichlet --alpha 0.5 \
+    --shadow_id 0 --n_shadows 16
+```
+
+The federated run produces the same outputs as centralized training
+(`model.pt` + `keep.npy` under `--savedir/<shadow_id>`), so the inference,
+scoring, and plotting steps of the LiRA pipeline work unchanged. The remaining
+arguments (`--pkeep`, `--shadow_id`, `--n_shadows`, etc.) behave the same in both
+modes.
+
 ## Results on MalIMG
 
 Using 16 shadow models trained with `ResNet18 for 100 epochs with 18 augmented queries`:
@@ -87,7 +120,7 @@ lira-pytorch/
 │   ├── fprtpr_resnet18_malimg.png
 │   └── fprtpr_wideresnet.png
 ├── dataset_utils.py        # dataset loading / preprocessing helpers
-├── train.py                # training script for models and shadows
+├── train.py                # training script for models and shadows (centralized or federated FedAvg)
 ├── inference.py            # run inference / LiRA attack pipeline
 ├── score.py                # scoring / evaluation utilities
 ├── plot.py                 # plotting utilities

@@ -78,6 +78,7 @@ def run():
     train_dl = DataLoader(train_ds, batch_size=128, shuffle=False, num_workers=4)
 
     # Infer the logits with multiple queries
+    os.makedirs(args.savedir, exist_ok=True)
     for path in os.listdir(args.savedir):
         # For macOS file system
         if path == ".DS_Store":

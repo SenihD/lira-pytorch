@@ -5,3 +5,4 @@ slurm
 gpu.sh
 *.out
 data/
+.DS_Store

@@ -89,6 +89,7 @@ def get_labels():
 
 def load_stats():
     # Ignore hidden files like .DS_Store
+    os.makedirs(args.savedir, exist_ok=True)
     model_dirs = [
         os.path.join(args.savedir, x) 
         for x in os.listdir(args.savedir) 

@@ -56,6 +56,7 @@ def load_data():
     scores = []
     keep = []
 
+    os.makedirs(args.savedir, exist_ok=True)
     for path in os.listdir(args.savedir):
         # For macOS file system
         if path == ".DS_Store":
